@@ -1,0 +1,5 @@
+C:/Users/proye/OneDrive/Escritorio/ProyectoArado/My project/.utmp/RelWithDebInfo/631i03a2/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/proye/OneDrive/Escritorio/ProyectoArado/My project/.utmp/RelWithDebInfo/631i03a2/arm64-v8a/CMakeFiles/rebuild_cache.dir
+C:/Users/proye/OneDrive/Escritorio/ProyectoArado/My project/.utmp/RelWithDebInfo/631i03a2/arm64-v8a/GameActivity/CMakeFiles/game.dir
+C:/Users/proye/OneDrive/Escritorio/ProyectoArado/My project/.utmp/RelWithDebInfo/631i03a2/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+C:/Users/proye/OneDrive/Escritorio/ProyectoArado/My project/.utmp/RelWithDebInfo/631i03a2/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir

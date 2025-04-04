@@ -1,277 +1,329 @@
 using UnityEngine;
-using UnityEngine.AI; // Necesario para NavMeshAgent
-using System.Collections; // <-- AÑADIR para Coroutines
+using UnityEngine.AI;
+using System.Collections;
+// --- Namespaces Necesarios ---
+using Oculus.Haptics;      // Para HapticClip, HapticClipPlayer, Controller
+// using Oculus.Interaction; // Ya no son estrictamente necesarios para esta versión
+// using Oculus.Interaction.Input; // Ya no son necesarios sin ControllerRef
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(AudioSource))] // AudioSource requerido
 public class OxFollowStick : MonoBehaviour
 {
-    private enum OxState
-    {
-        Idle,               // Quieto, esperando interacción
-        Following,          // Siguiendo al jugador
-        MovingToDestination,// Moviéndose automáticamente al punto final
-        RotatingToFinal, // <-- NUEVO
-        Locked              // Ha llegado al punto final y está bloqueado
-    }
+    // --- Estados ---
+    private enum OxState { Idle, Following, MovingToDestination, RotatingToFinal, Locked }
     private OxState currentState = OxState.Idle;
 
+    // --- Componentes ---
     private NavMeshAgent agent;
     private Animator animator;
+    private AudioSource audioSource;
+    private HapticClipPlayer hapticPlayer; // Para el clip háptico
 
+    // --- Configuración General ---
     [Header("Setup")]
     public Transform playerTarget;
     public string stickTipTag = "StickTip";
     public string animatorIsWalkingParam = "IsWalking";
 
+    // --- Configuración de Movimiento ---
     [Header("Movement")]
     public float followStoppingDistance = 2.5f;
-    public float rotationSpeed = 120f; // Grados por segundo para la rotación final
+    public float rotationSpeed = 120f;
 
-    // --- NUEVAS VARIABLES ---
+    // --- Configuración de Zona Final ---
     [Header("Plowing Zone Setup")]
-    public Transform finalDestination; // Asigna aquí el GameObject "OxFinalDestination"
-    public string plowingZoneTag = "PlowingZone"; // Tag de la Zona de Arado
+    public Transform finalDestination;
+    public string plowingZoneTag = "PlowingZone";
+
+    // --- Feedback al Tocar ---
+    [Header("Feedback al Tocar con Palo")]
+    [Tooltip("Clip háptico a reproducir al iniciar seguimiento")]
+    public HapticClip touchHapticClip; // Asigna TestClip1 o TestClip2
+    [Tooltip("Sonido a reproducir al iniciar seguimiento")]
+    public AudioClip touchAudioClip;  // Asigna tu sonido .wav/.mp3
 
     // --- Variables Internas ---
-    private Coroutine rotationCoroutine = null; // Para guardar referencia a la coroutine de rotación
+    private Coroutine rotationCoroutine = null;
 
     void Awake()
     {
+        // Obtener componentes principales
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+        audioSource = GetComponent<AudioSource>();
 
-        if (agent == null) { Debug.LogError("OxFollowStick: ¡NavMeshAgent no encontrado!", this); }
-        if (animator == null) { Debug.LogError("OxFollowStick: ¡Animator no encontrado en este objeto!", this); }
-        if (playerTarget == null) {/*... Código de fallback para playerTarget ...*/} // Mantener validación
+        // --- Validaciones Completas ---
+        if (agent == null) { Debug.LogError($"OxFollowStick ({gameObject.name}): NavMeshAgent no encontrado! Desactivando.", this); enabled = false; return; }
+        if (animator == null) { Debug.LogError($"OxFollowStick ({gameObject.name}): Animator no encontrado! Desactivando.", this); enabled = false; return; }
+        if (audioSource == null) { Debug.LogError($"OxFollowStick ({gameObject.name}): AudioSource no encontrado! Desactivando.", this); enabled = false; return; }
 
-        // --- NUEVA VALIDACIÓN ---
+        // Validar Player Target (con fallback opcional a Camera.main)
+        if (playerTarget == null)
+        {
+            Debug.LogWarning($"OxFollowStick ({gameObject.name}): Player Target no asignado! Intentando usar Camera.main.", this);
+            if (Camera.main != null)
+            {
+                playerTarget = Camera.main.transform;
+                Debug.Log($"OxFollowStick ({gameObject.name}): Player Target asignado a Camera.main.", this);
+            }
+            else
+            {
+                // Considera si la falta de target debe desactivar el script
+                Debug.LogError($"OxFollowStick ({gameObject.name}): Player Target no asignado y Camera.main no encontrada! El seguimiento no funcionará.", this);
+                // enabled = false; // Podrías desactivarlo si es crítico
+                // return;
+            }
+        }
+
+        // Validar Final Destination (crítico para el estado MovingToDestination)
         if (finalDestination == null)
         {
-            Debug.LogError($"OxFollowStick: ¡Final Destination no asignado en {gameObject.name}!", this);
+            Debug.LogError($"OxFollowStick ({gameObject.name}): Final Destination no asignado! El movimiento a la zona final fallará.", this);
+            // Podrías desactivar el script si esta mecánica es esencial
+            // enabled = false;
+            // return;
         }
+
+        // --- Configurar AudioSource ---
+        audioSource.playOnAwake = false;
+
+        // --- Crear Haptic Player ---
+        SetupHapticPlayer();
+
+        // --- Comprobar AudioClip ---
+        if (touchAudioClip == null) { Debug.LogWarning($"Ox {gameObject.name}: No hay 'touchAudioClip' asignado.", this); }
+    }
+
+    void SetupHapticPlayer() // Función separada para crear player
+    {
+        if (touchHapticClip != null)
+        {
+            try
+            {
+                hapticPlayer = new HapticClipPlayer(touchHapticClip);
+                Debug.Log($"Ox {gameObject.name}: HapticPlayer creado para clip '{touchHapticClip.name}'.");
+            }
+            catch (System.Exception e) { Debug.LogError($"Ox {gameObject.name}: Error creando HapticClipPlayer: {e.Message}", this); hapticPlayer = null; }
+        }
+        else { Debug.LogWarning($"Ox {gameObject.name}: No hay 'touchHapticClip' asignado.", this); hapticPlayer = null; }
     }
 
     void Start()
     {
         currentState = OxState.Idle;
-        if (agent != null) { agent.stoppingDistance = followStoppingDistance; }
-        SetWalkingAnimation(false); // Empezar en Idle
-        if (agent != null && agent.isOnNavMesh) { agent.isStopped = true; } // Asegurar que empieza parado si está en Navmesh
+        if (agent != null)
+        {
+            // Establecer stopping distance inicial para seguir al jugador
+            agent.stoppingDistance = followStoppingDistance;
+            if (agent.isOnNavMesh) { agent.isStopped = true; } // Asegurar que empieza parado si está en Navmesh
+        }
+        SetWalkingAnimation(false); // Empezar en Idle visualmente
+    }
+
+    void OnDestroy() // Limpiar al destruir o desactivar
+    {
+        hapticPlayer?.Dispose(); // Liberar recursos del Haptic Player
+        if (rotationCoroutine != null) // Detener coroutine si está activa
+        {
+            StopCoroutine(rotationCoroutine);
+            rotationCoroutine = null;
+        }
     }
 
     void Update()
     {
-        // Salir si no estamos listos
-        if (agent == null || !agent.isOnNavMesh) return;
+        if (agent == null || !agent.isOnNavMesh) return; // Salir si no estamos listos
 
         // --- LÓGICA BASADA EN ESTADOS ---
         switch (currentState)
         {
             case OxState.Idle:
-                // No hacer nada activamente, esperar interacción en OnTriggerEnter
-                // Asegurarse de que esté parado si llegó a Idle desde otro estado
                 EnsureAgentStopped();
                 break;
-
             case OxState.Following:
                 HandleFollowingState();
                 break;
-
             case OxState.MovingToDestination:
                 HandleMovingToDestinationState();
                 break;
-
             case OxState.RotatingToFinal:
-                // La coroutine está haciendo el trabajo de rotación.
-                // Podríamos añadir lógica aquí si es necesario, pero usualmente no hace falta.
-                // Nos aseguramos de que el agente siga detenido.
-                EnsureAgentStopped();
+                EnsureAgentStopped(); // La coroutine se encarga de rotar
                 break;
-
             case OxState.Locked:
-                // El buey simplemente se queda quieto.
-                // Asegurarse de que esté parado
                 EnsureAgentStopped();
                 break;
         }
     }
-
-    // --- Lógica específica de cada estado ---
-
-    void HandleFollowingState()
-    {
-        if (playerTarget == null) // Si perdemos el target mientras seguimos
-        {
-            StopFollowing(); // Volver a Idle
-            return;
-        }
-
-        float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
-
-        if (distanceToPlayer > agent.stoppingDistance)
-        {
-            if (agent.isStopped || agent.destination != playerTarget.position)
-            {
-                agent.SetDestination(playerTarget.position);
-                agent.isStopped = false;
-                SetWalkingAnimation(true);
-            }
-        }
-        else
-        {
-            if (!agent.isStopped)
-            {
-                agent.isStopped = true;
-                SetWalkingAnimation(false);
-            }
-        }
-    }
-
-
-    void HandleMovingToDestinationState()
-    {
-        if (finalDestination == null) return;
-
-        // ¿Hemos llegado?
-        // Usamos una distancia un poco mayor que stoppingDistance para asegurarnos de que entre en el rango
-        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.1f) // Umbral ligeramente mayor
-        {
-            Debug.Log($"Buey {gameObject.name} ha llegado cerca del destino final. Iniciando rotación.");
-
-            // --- CAMBIOS AQUÍ ---
-            currentState = OxState.RotatingToFinal; // Cambiar al estado de rotación
-            EnsureAgentStopped(); // Detener agente (ya debería estar parado, pero por si acaso)
-            SetWalkingAnimation(false); // Animación Idle
-
-            // Detener cualquier coroutine de rotación anterior si existiera (seguridad)
-            if (rotationCoroutine != null) { StopCoroutine(rotationCoroutine); }
-
-            // Iniciar la nueva coroutine de rotación
-            rotationCoroutine = StartCoroutine(RotateToFinalCoroutine(finalDestination.rotation));
-        }
-        else if (agent.isStopped) // Si se detuvo antes, reactivar
-        {
-            SetWalkingAnimation(true);
-            agent.isStopped = false;
-        }
-    }
-
-    // --- NUEVA COROUTINE para Rotación Suave ---
-    IEnumerator RotateToFinalCoroutine(Quaternion targetRotation)
-    {
-        Debug.Log($"Buey {gameObject.name} - Coroutine: Iniciando rotación suave.");
-        Quaternion startRotation = transform.rotation;
-        float angleDifference = Quaternion.Angle(startRotation, targetRotation);
-        float duration = angleDifference / rotationSpeed; // Calcular duración basada en ángulo y velocidad
-        float elapsedTime = 0f;
-
-        while (elapsedTime < duration)
-        {
-            // Interpolar suavemente (Slerp es bueno para rotaciones)
-            transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime / duration);
-            elapsedTime += Time.deltaTime;
-            yield return null; // Esperar al siguiente frame
-        }
-
-        // Asegurar la rotación final exacta y cambiar al estado bloqueado
-        transform.rotation = targetRotation;
-        currentState = OxState.Locked;
-        rotationCoroutine = null; // Limpiar referencia a la coroutine
-        Debug.Log($"Buey {gameObject.name} - Coroutine: Rotación final completada. Estado: Locked.");
-    }
-
-    // --- Detección de Colisiones/Triggers ---
-
+        
+    // --- OnTriggerEnter (Feedback + Llamada a StartFollowing) ---
     void OnTriggerEnter(Collider other)
     {
-        // --- Interacción con el Palo ---
         if (other.CompareTag(stickTipTag))
         {
-            // SOLO reaccionar al palo si estamos en Idle o Following
+            Debug.Log($"Ox {gameObject.name}: Toque de {other.name} [Tag:{other.tag}]. Estado: {currentState}");
+
+            // Reaccionar SOLO si estamos en Idle
             if (currentState == OxState.Idle)
             {
+                Debug.Log($"Ox {gameObject.name}: Toque válido en Idle. Activando feedback y seguimiento...");
+
+                // 1. Activar Feedback (Audio y Háptica Simplificada)
+                PlayTouchSound();
+                PlayTouchHapticSimple(); // Intenta vibrar en ambos mandos
+
+                // 2. Iniciar el Seguimiento
+                Debug.Log("Ox: Llamando a StartFollowing...");
                 StartFollowing();
+                Debug.Log($"Ox: Estado DESPUÉS de llamar a StartFollowing: {currentState}"); // Confirmar cambio
             }
+            // Detener si estamos siguiendo
             else if (currentState == OxState.Following)
             {
+                PlayTouchSound();
+                PlayTouchHapticSimple();
                 StopFollowing();
             }
-            // Si está en MovingToDestination o Locked, ignorar el palo
+            else { Debug.Log($"Ox {gameObject.name}: Toque de palo ignorado. Estado: {currentState}"); }
         }
-        // --- Interacción con la Zona de Arado ---
+        // Zona de Arado
         else if (other.CompareTag(plowingZoneTag))
         {
-            // SOLO reaccionar a la zona si estamos SIGUIENDO al jugador
             if (currentState == OxState.Following)
             {
-                Debug.Log($"Buey {gameObject.name} entrando en Zona de Arado mientras seguía. Iniciando movimiento a destino final.");
+                Debug.Log($"Buey {gameObject.name} entrando en Zona de Arado. Iniciando movimiento a destino final.");
                 InitiateMoveToDestination();
             }
         }
     }
 
-    // --- Control de Estados (Modificados/Nuevos) ---
+    // --- Funciones de Feedback ---
+    void PlayTouchSound()
+    {
+        if (audioSource != null && touchAudioClip != null)
+        {
+            audioSource.PlayOneShot(touchAudioClip);
+            Debug.Log($"Ox {gameObject.name}: Reproduciendo audio '{touchAudioClip.name}'.");
+        }
+    }
+
+    void PlayTouchHapticSimple()
+    {
+        if (hapticPlayer != null)
+        {
+            try
+            {
+                Debug.Log($"Ox {gameObject.name}: Intentando reproducir haptic '{touchHapticClip.name}' en Controller.Both...");
+                hapticPlayer.Play(Oculus.Haptics.Controller.Both); // Intenta en ambos
+            }
+            catch (System.Exception e) { Debug.LogError($"Ox {gameObject.name}: Error reproduciendo haptic: {e.Message}"); }
+        }
+        else { Debug.LogWarning($"Ox {gameObject.name}: No se reproduce haptic (Player nulo)."); }
+    }
+
+
+    // --- Funciones de Estado y Movimiento ---
+
+    void HandleFollowingState()
+    {
+        if (playerTarget == null) { StopFollowing(); return; }
+        float distanceToPlayer = Vector3.Distance(transform.position, playerTarget.position);
+        if (distanceToPlayer > agent.stoppingDistance)
+        {
+            if (agent.isStopped || agent.destination != playerTarget.position)
+            { agent.SetDestination(playerTarget.position); agent.isStopped = false; SetWalkingAnimation(true); }
+        }
+        else { if (!agent.isStopped) { agent.isStopped = true; SetWalkingAnimation(false); } }
+    }
+
+    void HandleMovingToDestinationState()
+    {
+        if (finalDestination == null) { Debug.LogWarning($"Ox {gameObject.name}: Intentando moverse a destino pero finalDestination es null."); return; }
+        if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.05f)
+        {
+            Debug.Log($"Buey {gameObject.name}: Llegó cerca del destino final. Iniciando rotación.");
+            currentState = OxState.RotatingToFinal;
+            EnsureAgentStopped();
+            SetWalkingAnimation(false);
+            if (rotationCoroutine != null) { StopCoroutine(rotationCoroutine); }
+            rotationCoroutine = StartCoroutine(RotateToFinalCoroutine(finalDestination.rotation));
+        }
+        else if (agent.isStopped && !agent.pathPending)
+        { SetWalkingAnimation(true); agent.isStopped = false; }
+    }
+
+    IEnumerator RotateToFinalCoroutine(Quaternion targetRotation)
+    {
+        Debug.Log($"Buey {gameObject.name} - Coroutine: Iniciando rotación suave.");
+        Quaternion startRotation = transform.rotation;
+        float angleDifference = Quaternion.Angle(startRotation, targetRotation);
+        float duration = (rotationSpeed > 0.01f) ? Mathf.Max(0.1f, angleDifference / rotationSpeed) : 0.1f;
+        float elapsedTime = 0f;
+        while (elapsedTime < duration)
+        {
+            transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime / duration);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        transform.rotation = targetRotation;
+        currentState = OxState.Locked;
+        rotationCoroutine = null;
+        Debug.Log($"Buey {gameObject.name} - Coroutine: Rotación final completada. Estado: Locked.");
+    }
 
     void StartFollowing()
     {
-        // Solo empezar a seguir si estamos en Idle
-        if (currentState != OxState.Idle) return;
-        if (playerTarget == null || agent == null || !agent.isOnNavMesh) return; // Validaciones básicas
-
-        Debug.Log($"Buey {gameObject.name}: ¡Empezando a seguir!");
+        if (currentState != OxState.Idle) { Debug.LogWarning("StartFollowing llamado pero el estado no era Idle."); return; }
+        // Ya no necesitamos las otras comprobaciones aquí si asumimos que Awake las hizo
+        // y que OnTriggerEnter solo llama a esto si other es válido.
+        Debug.Log($"Buey {gameObject.name}: CAMBIANDO A ESTADO FOLLOWING!");
         currentState = OxState.Following;
-        // La lógica de movimiento/animación la maneja Update
     }
 
     void StopFollowing()
     {
-        // Solo detener si estábamos siguiendo
         if (currentState != OxState.Following) return;
-
-        Debug.Log($"Buey {gameObject.name}: ¡Dejando de seguir (vuelve a Idle)!");
-        currentState = OxState.Idle; // Volver al estado Idle normal
+        Debug.Log($"Buey {gameObject.name}: Dejando de seguir (Idle)!");
+        currentState = OxState.Idle;
         EnsureAgentStopped();
         SetWalkingAnimation(false);
     }
 
-    // --- NUEVA FUNCIÓN ---
     void InitiateMoveToDestination()
     {
         if (finalDestination == null || agent == null || !agent.isOnNavMesh)
-        {
-            Debug.LogError($"Buey {gameObject.name}: No se puede iniciar movimiento a destino final (destino nulo o agente no listo).", this);
-            // Considerar volver a Idle si falla? O quedarse en Following? Por ahora, cambiamos estado pero logueamos error.
-            if (currentState != OxState.MovingToDestination) currentState = OxState.Idle; // Si falla, volver a Idle
-            return;
-        }
-
-        currentState = OxState.MovingToDestination; // Cambiar estado
-        agent.SetDestination(finalDestination.position); // Establecer destino
-        // Usaremos el stopping distance del agente para la llegada inicial,
-        // la coroutine afinará la posición si es necesario (aunque aquí solo rotamos)
-        agent.stoppingDistance = 0.1f;// O un valor más pequeño si se prefiere
-        agent.isStopped = false; // Asegurar que se mueva
-        SetWalkingAnimation(true); // Activar animación de caminar
+        { Debug.LogError($"Ox {gameObject.name}: Falla InitiateMoveToDestination.", this); if (currentState != OxState.MovingToDestination) currentState = OxState.Idle; return; }
+        currentState = OxState.MovingToDestination;
+        agent.SetDestination(finalDestination.position);
+        agent.stoppingDistance = 0.1f; // Asegurarse de que sea pequeño
+        agent.isStopped = false;
+        SetWalkingAnimation(true);
     }
 
-    // --- Función Auxiliar para Animación ---
-    void SetWalkingAnimation(bool isWalking)
-    {
-        if (animator != null) { animator.SetBool(animatorIsWalkingParam, isWalking); }
-    }
+    void SetWalkingAnimation(bool isWalking) { if (animator != null) { animator.SetBool(animatorIsWalkingParam, isWalking); } }
 
-    // --- NUEVA FUNCIÓN Auxiliar para detener agente ---
     void EnsureAgentStopped()
     {
-        // Comprobación añadida: no intentar detener si ya está en proceso de detenerse/rotar
         if (currentState == OxState.RotatingToFinal) return;
-
         if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh && !agent.isStopped)
-        {
-            agent.isStopped = true;
-            // Considera si ResetPath es necesario aquí. Puede serlo si quieres cancelar cualquier ajuste fino de posición.
-            // agent.ResetPath();
-        }
+        { agent.isStopped = true; /* agent.ResetPath(); */ }
     }
-}
+
+    // Función auxiliar para encontrar hijos (si fuera necesaria en el futuro)
+    // Si no la usas en otro sitio, puedes quitarla.
+    private Transform FindDeepChild(Transform parent, string childName)
+    {
+        Transform result = parent.Find(childName);
+        if (result != null)
+            return result;
+        foreach (Transform child in parent)
+        {
+            result = FindDeepChild(child, childName);
+            if (result != null)
+                return result;
+        }
+        return null;
+    }
+
+} // Fin de la clase OxFollowStick
