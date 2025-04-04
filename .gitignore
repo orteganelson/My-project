@@ -73,3 +73,10 @@ crashlytics-build.properties
 
 # Ignorar la carpeta completa
 /Assets/Oculus/Avatar2_SampleAssets/SampleAssets/SampleAssets/
+
+#Ignorar momentaneamente
+/Assets/Modelos.zip
+Assets/Modelos/MODELOS 3D MATEO/fbx/IGLESIA-blender4,0.blend
+Assets/Modelos/MODELOS 3D MATEO/fbx/OTRACABAÑA.blend
+Assets/Modelos/MODELOS FINALES/ARADO/TEXTURAS/MADERA 1/japanese_zelkova_bark_rough_4k.exr
+Assets/Modelos/MODELOS FINALES/VARA/TEXTURAS/japanese_zelkova_bark_rough_4k.exr
