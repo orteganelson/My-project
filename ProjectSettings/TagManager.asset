@@ -6,6 +6,7 @@ TagManager:
   tags:
   - StickTip
   - PlowingZone
+  - Tierra
   layers:
   - Default
   - TransparentFX

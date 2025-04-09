@@ -18,7 +18,7 @@ public class StickInfo : MonoBehaviour
         if (_grabInteractable == null) { _grabInteractable = GetComponent<GrabInteractable>(); }
         if (_grabInteractable == null)
         {
-            Debug.LogError("StickInfo: No se encontró o asignó el GrabInteractable en el palo.", this);
+            //Debug.LogError("StickInfo: No se encontró o asignó el GrabInteractable en el palo.", this);
             enabled = false;
             return;
         }
@@ -45,18 +45,18 @@ public class StickInfo : MonoBehaviour
             _currentHoldingController = (controllerRef.Handedness == Handedness.Right)
                                         ? Oculus.Haptics.Controller.Right
                                         : Oculus.Haptics.Controller.Left;
-            Debug.Log($"StickInfo: Palo agarrado por {_currentHoldingController.Value}");
+            //Debug.Log($"StickInfo: Palo agarrado por {_currentHoldingController.Value}");
         }
         else
         {
-            Debug.LogWarning($"StickInfo: No se encontró ControllerRef en el interactor {interactor.name} al agarrar.", interactor);
+            //Debug.LogWarning($"StickInfo: No se encontró ControllerRef en el interactor {interactor.name} al agarrar.", interactor);
             _currentHoldingController = null;
         }
     }
 
     private void HandleReleased(GrabInteractor interactor)
     {
-        Debug.Log($"StickInfo: Palo soltado por {interactor.name}");
+        //Debug.Log($"StickInfo: Palo soltado por {interactor.name}");
         _currentHoldingController = null;
     }
 }

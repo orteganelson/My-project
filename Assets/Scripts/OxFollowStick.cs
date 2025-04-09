@@ -62,16 +62,16 @@ public class OxFollowStick : MonoBehaviour
         // Validar Player Target (con fallback opcional a Camera.main)
         if (playerTarget == null)
         {
-            Debug.LogWarning($"OxFollowStick ({gameObject.name}): Player Target no asignado! Intentando usar Camera.main.", this);
+            //Debug.LogWarning($"OxFollowStick ({gameObject.name}): Player Target no asignado! Intentando usar Camera.main.", this);
             if (Camera.main != null)
             {
                 playerTarget = Camera.main.transform;
-                Debug.Log($"OxFollowStick ({gameObject.name}): Player Target asignado a Camera.main.", this);
+                //Debug.Log($"OxFollowStick ({gameObject.name}): Player Target asignado a Camera.main.", this);
             }
             else
             {
                 // Considera si la falta de target debe desactivar el script
-                Debug.LogError($"OxFollowStick ({gameObject.name}): Player Target no asignado y Camera.main no encontrada! El seguimiento no funcionará.", this);
+                //Debug.LogError($"OxFollowStick ({gameObject.name}): Player Target no asignado y Camera.main no encontrada! El seguimiento no funcionará.", this);
                 // enabled = false; // Podrías desactivarlo si es crítico
                 // return;
             }
@@ -80,7 +80,7 @@ public class OxFollowStick : MonoBehaviour
         // Validar Final Destination (crítico para el estado MovingToDestination)
         if (finalDestination == null)
         {
-            Debug.LogError($"OxFollowStick ({gameObject.name}): Final Destination no asignado! El movimiento a la zona final fallará.", this);
+            //Debug.LogError($"OxFollowStick ({gameObject.name}): Final Destination no asignado! El movimiento a la zona final fallará.", this);
             // Podrías desactivar el script si esta mecánica es esencial
             // enabled = false;
             // return;
@@ -162,21 +162,21 @@ public class OxFollowStick : MonoBehaviour
     {
         if (other.CompareTag(stickTipTag))
         {
-            Debug.Log($"Ox {gameObject.name}: Toque de {other.name} [Tag:{other.tag}]. Estado: {currentState}");
+            //Debug.Log($"Ox {gameObject.name}: Toque de {other.name} [Tag:{other.tag}]. Estado: {currentState}");
 
             // Reaccionar SOLO si estamos en Idle
             if (currentState == OxState.Idle)
             {
-                Debug.Log($"Ox {gameObject.name}: Toque válido en Idle. Activando feedback y seguimiento...");
+               //Debug.Log($"Ox {gameObject.name}: Toque válido en Idle. Activando feedback y seguimiento...");
 
                 // 1. Activar Feedback (Audio y Háptica Simplificada)
                 PlayTouchSound();
                 PlayTouchHapticSimple(); // Intenta vibrar en ambos mandos
 
                 // 2. Iniciar el Seguimiento
-                Debug.Log("Ox: Llamando a StartFollowing...");
+                //Debug.Log("Ox: Llamando a StartFollowing...");
                 StartFollowing();
-                Debug.Log($"Ox: Estado DESPUÉS de llamar a StartFollowing: {currentState}"); // Confirmar cambio
+                //Debug.Log($"Ox: Estado DESPUÉS de llamar a StartFollowing: {currentState}"); // Confirmar cambio
             }
             // Detener si estamos siguiendo
             else if (currentState == OxState.Following)
@@ -192,7 +192,7 @@ public class OxFollowStick : MonoBehaviour
         {
             if (currentState == OxState.Following)
             {
-                Debug.Log($"Buey {gameObject.name} entrando en Zona de Arado. Iniciando movimiento a destino final.");
+                //Debug.Log($"Buey {gameObject.name} entrando en Zona de Arado. Iniciando movimiento a destino final.");
                 InitiateMoveToDestination();
             }
         }
@@ -204,7 +204,7 @@ public class OxFollowStick : MonoBehaviour
         if (audioSource != null && touchAudioClip != null)
         {
             audioSource.PlayOneShot(touchAudioClip);
-            Debug.Log($"Ox {gameObject.name}: Reproduciendo audio '{touchAudioClip.name}'.");
+            //Debug.Log($"Ox {gameObject.name}: Reproduciendo audio '{touchAudioClip.name}'.");
         }
     }
 
@@ -214,7 +214,7 @@ public class OxFollowStick : MonoBehaviour
         {
             try
             {
-                Debug.Log($"Ox {gameObject.name}: Intentando reproducir haptic '{touchHapticClip.name}' en Controller.Both...");
+                //Debug.Log($"Ox {gameObject.name}: Intentando reproducir haptic '{touchHapticClip.name}' en Controller.Both...");
                 hapticPlayer.Play(Oculus.Haptics.Controller.Both); // Intenta en ambos
             }
             catch (System.Exception e) { Debug.LogError($"Ox {gameObject.name}: Error reproduciendo haptic: {e.Message}"); }
@@ -242,7 +242,7 @@ public class OxFollowStick : MonoBehaviour
         if (finalDestination == null) { Debug.LogWarning($"Ox {gameObject.name}: Intentando moverse a destino pero finalDestination es null."); return; }
         if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance + 0.05f)
         {
-            Debug.Log($"Buey {gameObject.name}: Llegó cerca del destino final. Iniciando rotación.");
+            //Debug.Log($"Buey {gameObject.name}: Llegó cerca del destino final. Iniciando rotación.");
             currentState = OxState.RotatingToFinal;
             EnsureAgentStopped();
             SetWalkingAnimation(false);
@@ -255,7 +255,7 @@ public class OxFollowStick : MonoBehaviour
 
     IEnumerator RotateToFinalCoroutine(Quaternion targetRotation)
     {
-        Debug.Log($"Buey {gameObject.name} - Coroutine: Iniciando rotación suave.");
+        //Debug.Log($"Buey {gameObject.name} - Coroutine: Iniciando rotación suave.");
         Quaternion startRotation = transform.rotation;
         float angleDifference = Quaternion.Angle(startRotation, targetRotation);
         float duration = (rotationSpeed > 0.01f) ? Mathf.Max(0.1f, angleDifference / rotationSpeed) : 0.1f;
@@ -269,7 +269,7 @@ public class OxFollowStick : MonoBehaviour
         transform.rotation = targetRotation;
         currentState = OxState.Locked;
         rotationCoroutine = null;
-        Debug.Log($"Buey {gameObject.name} - Coroutine: Rotación final completada. Estado: Locked.");
+        //Debug.Log($"Buey {gameObject.name} - Coroutine: Rotación final completada. Estado: Locked.");
     }
 
     void StartFollowing()
@@ -277,14 +277,14 @@ public class OxFollowStick : MonoBehaviour
         if (currentState != OxState.Idle) { Debug.LogWarning("StartFollowing llamado pero el estado no era Idle."); return; }
         // Ya no necesitamos las otras comprobaciones aquí si asumimos que Awake las hizo
         // y que OnTriggerEnter solo llama a esto si other es válido.
-        Debug.Log($"Buey {gameObject.name}: CAMBIANDO A ESTADO FOLLOWING!");
+        //Debug.Log($"Buey {gameObject.name}: CAMBIANDO A ESTADO FOLLOWING!");
         currentState = OxState.Following;
     }
 
     void StopFollowing()
     {
         if (currentState != OxState.Following) return;
-        Debug.Log($"Buey {gameObject.name}: Dejando de seguir (Idle)!");
+        //Debug.Log($"Buey {gameObject.name}: Dejando de seguir (Idle)!");
         currentState = OxState.Idle;
         EnsureAgentStopped();
         SetWalkingAnimation(false);

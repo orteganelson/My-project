@@ -41,36 +41,36 @@ public class TriggerHapticOnGrab : MonoBehaviour
         // --- Comprobación del GrabInteractable ---
         if (grabInteractable == null)
         {
-            Debug.LogError("Error: El campo 'grabInteractable' no está asignado en el Inspector!", this);
+            //Debug.LogError("Error: El campo 'grabInteractable' no está asignado en el Inspector!", this);
             enabled = false;
             return;
         }
 
         // --- Comprobación y Creación del ClipPlayer ---
-        Debug.Log($"Awake: Configurando Haptics. hapticClip asignado es: {(hapticClip != null ? hapticClip.name : "NULL")}", this);
+        //Debug.Log($"Awake: Configurando Haptics. hapticClip asignado es: {(hapticClip != null ? hapticClip.name : "NULL")}", this);
         if (hapticClip != null)
         {
             try
             {
                 clipPlayer = new HapticClipPlayer(hapticClip);
-                Debug.Log($"Awake: HapticClipPlayer creado para '{hapticClip.name}'.", this);
+                //Debug.Log($"Awake: HapticClipPlayer creado para '{hapticClip.name}'.", this);
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Awake: Error al crear HapticClipPlayer: {e.Message}.", this);
+                //Debug.LogError($"Awake: Error al crear HapticClipPlayer: {e.Message}.", this);
                 clipPlayer = null;
             }
         }
         else
         {
-            Debug.LogWarning("Awake: No hay Haptic Clip asignado. Se usará la vibración manual OVRInput si se activa.", this);
+            //Debug.LogWarning("Awake: No hay Haptic Clip asignado. Se usará la vibración manual OVRInput si se activa.", this);
             clipPlayer = null;
         }
 
         // --- Comprobación del AudioClip ---
         if (audioClip == null)
         {
-            Debug.LogWarning("Awake: No hay AudioClip asignado en el Inspector. No habrá sonido de agarre.", this);
+            //Debug.LogWarning("Awake: No hay AudioClip asignado en el Inspector. No habrá sonido de agarre.", this);
         }
 
         // Suscribirse al evento (mejor en OnEnable/OnDisable)
@@ -90,17 +90,17 @@ public class TriggerHapticOnGrab : MonoBehaviour
     // Cuando se agarra el objeto
     private void WhenSelectingInteractorAdded_Action(GrabInteractor obj)
     {
-        Debug.Log($"WhenSelectingInteractorAdded_Action: Agarrado por {obj.name}");
+        //Debug.Log($"WhenSelectingInteractorAdded_Action: Agarrado por {obj.name}");
         ControllerRef controllerRef = obj.GetComponentInParent<ControllerRef>();
         if (controllerRef)
         {
-            Debug.Log($"ControllerRef encontrado. Handedness: {controllerRef.Handedness}");
+            //Debug.Log($"ControllerRef encontrado. Handedness: {controllerRef.Handedness}");
             OVRInput.Controller ovrController = (controllerRef.Handedness == Handedness.Right) ? OVRInput.Controller.RTouch : OVRInput.Controller.LTouch;
             TriggerEffects(ovrController); // Llamar a la función que dispara ambos efectos
         }
         else
         {
-            Debug.LogWarning($"No se encontró ControllerRef en el interactor {obj.name} o sus padres. No se puede determinar la mano para la háptica.", obj);
+            //Debug.LogWarning($"No se encontró ControllerRef en el interactor {obj.name} o sus padres. No se puede determinar la mano para la háptica.", obj);
             // Podríamos intentar reproducir el audio sin saber la mano
             PlayGrabSound();
             // Pero no la háptica específica
@@ -120,7 +120,7 @@ public class TriggerHapticOnGrab : MonoBehaviour
     {
         if (audioClip != null && audioSource != null)
         {
-            Debug.Log($"Reproduciendo AudioClip: {audioClip.name}");
+            //Debug.Log($"Reproduciendo AudioClip: {audioClip.name}");
             // Usamos PlayOneShot para efectos cortos, no interrumpe otros sonidos
             // y no necesita asignar el clip al source cada vez.
             audioSource.PlayOneShot(audioClip);
@@ -137,14 +137,14 @@ public class TriggerHapticOnGrab : MonoBehaviour
     public void TriggerHaptics(OVRInput.Controller controller)
     {
         // Logs de depuración (como estaban)
-        Debug.Log($"TriggerHaptics llamado para controller: {controller}. Verificando hapticClip...");
-        Debug.Log($"Valor de 'hapticClip' AHORA MISMO: {(hapticClip != null ? hapticClip.name : "NULL")}");
-        Debug.Log($"Valor de 'clipPlayer' AHORA MISMO: {(clipPlayer != null ? "Existe" : "NULL")}");
+        //Debug.Log($"TriggerHaptics llamado para controller: {controller}. Verificando hapticClip...");
+        //Debug.Log($"Valor de 'hapticClip' AHORA MISMO: {(hapticClip != null ? hapticClip.name : "NULL")}");
+        //Debug.Log($"Valor de 'clipPlayer' AHORA MISMO: {(clipPlayer != null ? "Existe" : "NULL")}");
 
         // Reproducir HapticClip si está disponible
         if (hapticClip != null && clipPlayer != null)
         {
-            Debug.Log("Intentando reproducir Haptic Clip...");
+            //Debug.Log("Intentando reproducir Haptic Clip...");
             bool controllerFound = false;
             Oculus.Haptics.Controller targetHand = Oculus.Haptics.Controller.Left;
 
@@ -164,7 +164,7 @@ public class TriggerHapticOnGrab : MonoBehaviour
                 try
                 {
                     clipPlayer.Play(targetHand);
-                    Debug.Log($"clipPlayer.Play({targetHand}) llamado.");
+                    //Debug.Log($"clipPlayer.Play({targetHand}) llamado.");
                 }
                 catch (System.Exception e) { Debug.LogError($"Error al llamar a clipPlayer.Play: {e.Message}", this); }
             }
@@ -173,7 +173,7 @@ public class TriggerHapticOnGrab : MonoBehaviour
         // Si no hay HapticClip, ¿quieres el fallback o no? Podrías quitar este else.
         else
         {
-            Debug.LogWarning("hapticClip o clipPlayer es NULL. Ejecutando fallback TriggerHapticsRoutine (vibración manual)...");
+            //Debug.LogWarning("hapticClip o clipPlayer es NULL. Ejecutando fallback TriggerHapticsRoutine (vibración manual)...");
             StartCoroutine(TriggerHapticsRoutine(controller));
         }
     }
@@ -181,11 +181,11 @@ public class TriggerHapticOnGrab : MonoBehaviour
     // Coroutine de fallback (como estaba)
     public IEnumerator TriggerHapticsRoutine(OVRInput.Controller controller)
     {
-        Debug.Log($"Executing TriggerHapticsRoutine para {controller} con Freq:{fallbackFrequency}, Amp:{fallbackAmplitude}, Dur:{fallbackDuration}");
+        //Debug.Log($"Executing TriggerHapticsRoutine para {controller} con Freq:{fallbackFrequency}, Amp:{fallbackAmplitude}, Dur:{fallbackDuration}");
         OVRInput.SetControllerVibration(fallbackFrequency, fallbackAmplitude, controller);
         yield return new WaitForSeconds(fallbackDuration);
         OVRInput.SetControllerVibration(0, 0, controller);
-        Debug.Log($"Finalizado TriggerHapticsRoutine para {controller}");
+        //Debug.Log($"Finalizado TriggerHapticsRoutine para {controller}");
     }
 
     // Función auxiliar (como estaba)
