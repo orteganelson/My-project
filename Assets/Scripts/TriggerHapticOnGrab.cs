@@ -1,50 +1,56 @@
 using Oculus.Interaction;
-using System.Collections;
-using UnityEngine;
 using Oculus.Interaction.Input;
 using Oculus.Haptics;
-// using OVR; // Solo si usas OVRInput
+using System.Collections;
+using UnityEngine;
 
 // Asegúrate de tener un AudioSource en el objeto o asignado
-[RequireComponent(typeof(AudioSource))] // Añadimos esto para asegurar que exista o añadirlo automáticamente
+[RequireComponent(typeof(AudioSource))]
 public class TriggerHapticOnGrab : MonoBehaviour
 {
     [Header("Archivos a Reproducir")]
     [Tooltip("Arrastra aquí el archivo .haptic (TestClip1 o stick_grab)")]
     public HapticClip hapticClip;
     [Tooltip("Arrastra aquí el archivo de audio (.wav, .mp3) para el sonido de agarre")]
-    public AudioClip audioClip; // <-- NUEVO CAMPO PARA AUDIO
+    public AudioClip audioClip;
 
     [Header("Configuración Vibración Manual (Fallback)")]
     [Range(0, 2.5f)]
     public float fallbackDuration = 0.1f;
     [Range(0, 1)]
-    public float fallbackAmplitude = 0.5f; // Bajar un poco por defecto
+    public float fallbackAmplitude = 0.5f;
     [Range(0, 1)]
-    public float fallbackFrequency = 0.5f; // Bajar un poco por defecto
+    public float fallbackFrequency = 0.5f;
 
     [Header("Referencias de Interacción")]
-    [Tooltip("Asigna el componente GrabInteractable de este objeto")]
-    public GrabInteractable grabInteractable; // Ya lo tenías
+    [Tooltip("Asigna el componente GrabInteractable de este objeto (para agarre directo)")]
+    public GrabInteractable grabInteractable;
+    [Tooltip("Asigna el componente DistanceGrabInteractable de este objeto (para agarre a distancia)")]
+    public DistanceGrabInteractable distanceGrabInteractable;
+
 
     // --- Componentes privados ---
     private HapticClipPlayer clipPlayer;
-    private AudioSource audioSource; // <-- NUEVA VARIABLE PARA AUDIO SOURCE
+    private AudioSource audioSource;
 
-    void Awake() // Cambiado a Awake para asegurar que AudioSource esté listo antes de Start
+    void Awake()
     {
         // Obtener el AudioSource (RequireComponent asegura que exista)
         audioSource = GetComponent<AudioSource>();
         // Configurar AudioSource (opcional, pero bueno para efectos cortos)
         audioSource.playOnAwake = false; // No reproducir al inicio
 
-        // --- Comprobación del GrabInteractable ---
-        if (grabInteractable == null)
+        // --- Comprobación de los Interactables ---
+        if (grabInteractable == null && distanceGrabInteractable == null)
         {
-            //Debug.LogError("Error: El campo 'grabInteractable' no está asignado en el Inspector!", this);
-            enabled = false;
+            Debug.LogError($"Error: Debes asignar al menos 'grabInteractable' o 'distanceGrabInteractable' en el Inspector!", this);
+            enabled = false; // Desactivar el script si no hay nada que escuchar
             return;
         }
+        // Aviso si alguno falta (opcional)
+        if (grabInteractable == null) Debug.LogWarning("No hay 'grabInteractable' asignado. El agarre directo no activará efectos desde este script.", this);
+        if (distanceGrabInteractable == null) Debug.LogWarning("No hay 'distanceGrabInteractable' asignado. El agarre a distancia no activará efectos desde este script.", this);
+
 
         // --- Comprobación y Creación del ClipPlayer ---
         //Debug.Log($"Awake: Configurando Haptics. hapticClip asignado es: {(hapticClip != null ? hapticClip.name : "NULL")}", this);
@@ -57,7 +63,7 @@ public class TriggerHapticOnGrab : MonoBehaviour
             }
             catch (System.Exception e)
             {
-                //Debug.LogError($"Awake: Error al crear HapticClipPlayer: {e.Message}.", this);
+                Debug.LogError($"Awake: Error al crear HapticClipPlayer: {e.Message}.", this);
                 clipPlayer = null;
             }
         }
@@ -72,42 +78,89 @@ public class TriggerHapticOnGrab : MonoBehaviour
         {
             //Debug.LogWarning("Awake: No hay AudioClip asignado en el Inspector. No habrá sonido de agarre.", this);
         }
-
-        // Suscribirse al evento (mejor en OnEnable/OnDisable)
-        grabInteractable.WhenSelectingInteractorAdded.Action += WhenSelectingInteractorAdded_Action;
     }
 
-    private void OnDestroy() // O OnDisable si prefieres
+    // Es mejor suscribirse a eventos en OnEnable
+    private void OnEnable()
     {
-        // Desuscribirse siempre
+        // Suscribirse al evento de agarre directo si existe
         if (grabInteractable != null)
         {
-            grabInteractable.WhenSelectingInteractorAdded.Action -= WhenSelectingInteractorAdded_Action;
+            grabInteractable.WhenSelectingInteractorAdded.Action += HandleGrabInteractorAdded;
+            // Podrías suscribirte a otros eventos si los necesitas, como WhenSelectingInteractorRemoved
         }
-        clipPlayer?.Dispose(); // Limpiar el player
+
+        // Suscribirse al evento de agarre a distancia si existe
+        if (distanceGrabInteractable != null)
+        {
+            distanceGrabInteractable.WhenSelectingInteractorAdded.Action += HandleDistanceGrabInteractorAdded;
+            // Podrías suscribirte a otros eventos si los necesitas
+        }
     }
 
-    // Cuando se agarra el objeto
-    private void WhenSelectingInteractorAdded_Action(GrabInteractor obj)
+    // Y desuscribirse en OnDisable para evitar memory leaks o errores
+    private void OnDisable()
     {
-        //Debug.Log($"WhenSelectingInteractorAdded_Action: Agarrado por {obj.name}");
-        ControllerRef controllerRef = obj.GetComponentInParent<ControllerRef>();
-        if (controllerRef)
+        // Desuscribirse siempre, comprobando si no son null
+        if (grabInteractable != null)
+        {
+            grabInteractable.WhenSelectingInteractorAdded.Action -= HandleGrabInteractorAdded;
+        }
+        if (distanceGrabInteractable != null)
+        {
+            distanceGrabInteractable.WhenSelectingInteractorAdded.Action -= HandleDistanceGrabInteractorAdded;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        clipPlayer?.Dispose(); // Limpiar el player de háptica al destruir el objeto
+    }
+
+    // --- Manejadores de eventos específicos que llaman al manejador genérico ---
+
+    // Se llama cuando GrabInteractable (directo) añade un interactor
+    private void HandleGrabInteractorAdded(GrabInteractor interactor)
+    {
+        //Debug.Log($"HandleGrabInteractorAdded: Agarrado directamente por {interactor.name}");
+        HandleInteractorAdded(interactor); // Llama al manejador común
+    }
+
+    // Se llama cuando DistanceGrabInteractable (a distancia) añade un interactor
+    private void HandleDistanceGrabInteractorAdded(DistanceGrabInteractor interactor)
+    {
+        // Debug.Log($"HandleDistanceGrabInteractorAdded: Agarrado a distancia por {interactor.name}");
+        HandleInteractorAdded(interactor); // Llama al manejador común
+    }
+
+    // --- NUEVO MÉTODO GENÉRICO: Maneja la lógica común para cualquier interactor ---
+    private void HandleInteractorAdded(Component interactor) // Usamos Component como tipo base común
+    {
+        //Debug.Log($"HandleInteractorAdded: Procesando interactor {interactor.name} de tipo {interactor.GetType()}");
+
+        // Intentamos encontrar el ControllerRef para saber qué mano es
+        ControllerRef controllerRef = interactor.GetComponentInParent<ControllerRef>();
+        if (controllerRef != null)
         {
             //Debug.Log($"ControllerRef encontrado. Handedness: {controllerRef.Handedness}");
-            OVRInput.Controller ovrController = (controllerRef.Handedness == Handedness.Right) ? OVRInput.Controller.RTouch : OVRInput.Controller.LTouch;
+            // Determinar el controlador OVR basado en la lateralidad (Handedness)
+            OVRInput.Controller ovrController = (controllerRef.Handedness == Handedness.Right)
+                                                ? OVRInput.Controller.RTouch
+                                                : OVRInput.Controller.LTouch;
             TriggerEffects(ovrController); // Llamar a la función que dispara ambos efectos
         }
         else
         {
-            //Debug.LogWarning($"No se encontró ControllerRef en el interactor {obj.name} o sus padres. No se puede determinar la mano para la háptica.", obj);
-            // Podríamos intentar reproducir el audio sin saber la mano
+            //Debug.LogWarning($"No se encontró ControllerRef en el interactor {interactor.name} o sus padres. No se puede determinar la mano para la háptica.", interactor);
+            // Si no sabemos la mano, al menos podemos intentar reproducir el sonido
             PlayGrabSound();
-            // Pero no la háptica específica
+            // Podríamos decidir activar la háptica en ambas manos o ninguna si no se encuentra ControllerRef
+            // Por ahora, solo se reproduce el sonido en este caso.
         }
     }
 
-    // --- NUEVA FUNCIÓN: Dispara ambos efectos ---
+
+    // --- FUNCIÓN: Dispara ambos efectos (Sin cambios) ---
     public void TriggerEffects(OVRInput.Controller controller)
     {
         PlayGrabSound(); // Llama a la función para reproducir audio
@@ -115,14 +168,12 @@ public class TriggerHapticOnGrab : MonoBehaviour
     }
 
 
-    // --- FUNCIÓN PARA REPRODUCIR AUDIO ---
+    // --- FUNCIÓN PARA REPRODUCIR AUDIO (Sin cambios) ---
     private void PlayGrabSound()
     {
         if (audioClip != null && audioSource != null)
         {
             //Debug.Log($"Reproduciendo AudioClip: {audioClip.name}");
-            // Usamos PlayOneShot para efectos cortos, no interrumpe otros sonidos
-            // y no necesita asignar el clip al source cada vez.
             audioSource.PlayOneShot(audioClip);
         }
         else
@@ -133,10 +184,10 @@ public class TriggerHapticOnGrab : MonoBehaviour
     }
 
 
-    // --- FUNCIÓN PARA REPRODUCIR HÁPTICA (Modificada ligeramente) ---
+    // --- FUNCIÓN PARA REPRODUCIR HÁPTICA (Sin cambios estructurales) ---
     public void TriggerHaptics(OVRInput.Controller controller)
     {
-        // Logs de depuración (como estaban)
+        // Logs de depuración
         //Debug.Log($"TriggerHaptics llamado para controller: {controller}. Verificando hapticClip...");
         //Debug.Log($"Valor de 'hapticClip' AHORA MISMO: {(hapticClip != null ? hapticClip.name : "NULL")}");
         //Debug.Log($"Valor de 'clipPlayer' AHORA MISMO: {(clipPlayer != null ? "Existe" : "NULL")}");
@@ -144,9 +195,9 @@ public class TriggerHapticOnGrab : MonoBehaviour
         // Reproducir HapticClip si está disponible
         if (hapticClip != null && clipPlayer != null)
         {
-            //Debug.Log("Intentando reproducir Haptic Clip...");
+            // Debug.Log("Intentando reproducir Haptic Clip...");
             bool controllerFound = false;
-            Oculus.Haptics.Controller targetHand = Oculus.Haptics.Controller.Left;
+            Oculus.Haptics.Controller targetHand = Oculus.Haptics.Controller.Left; // Default
 
             if (controller == OVRInput.Controller.RTouch)
             {
@@ -158,6 +209,7 @@ public class TriggerHapticOnGrab : MonoBehaviour
                 targetHand = Oculus.Haptics.Controller.Left;
                 controllerFound = true;
             }
+            // Podrías añadir casos para OVRInput.Controller.Touch, .LTrackedRemote, .RTrackedRemote si fueran relevantes
 
             if (controllerFound)
             {
@@ -170,27 +222,25 @@ public class TriggerHapticOnGrab : MonoBehaviour
             }
             else { Debug.LogWarning($"No se pudo mapear OVRInput.Controller ({controller}) a Oculus.Haptics.Controller.", this); }
         }
-        // Si no hay HapticClip, ¿quieres el fallback o no? Podrías quitar este else.
+        // Si no hay HapticClip definido, usar el fallback manual
         else
         {
-            //Debug.LogWarning("hapticClip o clipPlayer es NULL. Ejecutando fallback TriggerHapticsRoutine (vibración manual)...");
+            // Debug.LogWarning("hapticClip o clipPlayer es NULL. Ejecutando fallback TriggerHapticsRoutine (vibración manual)...");
             StartCoroutine(TriggerHapticsRoutine(controller));
         }
     }
 
-    // Coroutine de fallback (como estaba)
+    // Coroutine de fallback (Sin cambios)
     public IEnumerator TriggerHapticsRoutine(OVRInput.Controller controller)
     {
-        //Debug.Log($"Executing TriggerHapticsRoutine para {controller} con Freq:{fallbackFrequency}, Amp:{fallbackAmplitude}, Dur:{fallbackDuration}");
+        // Debug.Log($"Executing TriggerHapticsRoutine para {controller} con Freq:{fallbackFrequency}, Amp:{fallbackAmplitude}, Dur:{fallbackDuration}");
         OVRInput.SetControllerVibration(fallbackFrequency, fallbackAmplitude, controller);
         yield return new WaitForSeconds(fallbackDuration);
         OVRInput.SetControllerVibration(0, 0, controller);
-        //Debug.Log($"Finalizado TriggerHapticsRoutine para {controller}");
+        // Debug.Log($"Finalizado TriggerHapticsRoutine para {controller}");
     }
 
-    // Función auxiliar (como estaba)
-    private T GetComponentInParent<T>(GrabInteractor obj) where T : Component { /* ... */ return null; }
-    // Implementación real de FindDeepChild (necesaria si se usa antes)
-    private Transform FindDeepChild(Transform parent, string childName) { Transform result = parent.Find(childName); if (result != null) return result; foreach (Transform child in parent) { result = FindDeepChild(child, childName); if (result != null) return result; } return null; }
+    // Ya no necesitamos las funciones auxiliares GetComponentInParent o FindDeepChild si no las usas en otra parte
+    // private Transform FindDeepChild(Transform parent, string childName) { /* ... */ }
 
 }

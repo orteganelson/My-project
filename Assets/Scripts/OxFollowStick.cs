@@ -1,14 +1,11 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
-// --- Namespaces Necesarios ---
-using Oculus.Haptics;      // Para HapticClip, HapticClipPlayer, Controller
-// using Oculus.Interaction; // Ya no son estrictamente necesarios para esta versión
-// using Oculus.Interaction.Input; // Ya no son necesarios sin ControllerRef
+using Oculus.Haptics;      
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(AudioSource))] // AudioSource requerido
+[RequireComponent(typeof(AudioSource))] 
 public class OxFollowStick : MonoBehaviour
 {
     // --- Estados ---
@@ -19,9 +16,9 @@ public class OxFollowStick : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
     private AudioSource audioSource;
-    private HapticClipPlayer hapticPlayer; // Para el clip háptico
+    private HapticClipPlayer hapticPlayer; 
 
-    // --- Configuración General ---
+
     [Header("Setup")]
     public Transform playerTarget;
     public string stickTipTag = "StickTip";
@@ -40,21 +37,20 @@ public class OxFollowStick : MonoBehaviour
     // --- Feedback al Tocar ---
     [Header("Feedback al Tocar con Palo")]
     [Tooltip("Clip háptico a reproducir al iniciar seguimiento")]
-    public HapticClip touchHapticClip; // Asigna TestClip1 o TestClip2
+    public HapticClip touchHapticClip; 
     [Tooltip("Sonido a reproducir al iniciar seguimiento")]
-    public AudioClip touchAudioClip;  // Asigna tu sonido .wav/.mp3
+    public AudioClip touchAudioClip; 
 
-    // --- Variables Internas ---
+
     private Coroutine rotationCoroutine = null;
 
     void Awake()
     {
-        // Obtener componentes principales
+
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
 
-        // --- Validaciones Completas ---
         if (agent == null) { Debug.LogError($"OxFollowStick ({gameObject.name}): NavMeshAgent no encontrado! Desactivando.", this); enabled = false; return; }
         if (animator == null) { Debug.LogError($"OxFollowStick ({gameObject.name}): Animator no encontrado! Desactivando.", this); enabled = false; return; }
         if (audioSource == null) { Debug.LogError($"OxFollowStick ({gameObject.name}): AudioSource no encontrado! Desactivando.", this); enabled = false; return; }
@@ -193,6 +189,11 @@ public class OxFollowStick : MonoBehaviour
             if (currentState == OxState.Following)
             {
                 //Debug.Log($"Buey {gameObject.name} entrando en Zona de Arado. Iniciando movimiento a destino final.");
+                InitiateMoveToDestination();
+            }
+            ////////////////////////
+            if (currentState == OxState.Idle)
+            {
                 InitiateMoveToDestination();
             }
         }
