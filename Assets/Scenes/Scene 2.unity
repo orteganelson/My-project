@@ -890,7 +890,7 @@ GameObject:
   - component: {fileID: 69548716}
   - component: {fileID: 69548715}
   - component: {fileID: 69548714}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Seed (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6155,7 +6155,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 109074923}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6374,7 +6374,7 @@ GameObject:
   - component: {fileID: 147416266}
   - component: {fileID: 147416268}
   - component: {fileID: 147416267}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Bolsa Semilla
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6395,6 +6395,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1876607919}
+  - {fileID: 1224087354}
   - {fileID: 109074923}
   - {fileID: 1430955265}
   - {fileID: 1203376624}
@@ -9731,6 +9732,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6387159395818230200, guid: df854889ba8b3b248bf96424a3b89e17, type: 3}
   m_PrefabInstance: {fileID: 662480917}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &683279436
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 683279437}
+  m_Layer: 8
+  m_Name: LeftHandSeedAttach
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &683279437
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 683279436}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.0848, y: 0.02, z: -0.001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8015098747546184855}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &693063708
 GameObject:
   m_ObjectHideFlags: 0
@@ -10691,7 +10723,7 @@ GameObject:
   m_Component:
   - component: {fileID: 812472662}
   - component: {fileID: 812472663}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HandGrabPose
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11667,6 +11699,37 @@ MonoBehaviour:
   _defaultInteractable: {fileID: 0}
   _timeOutInteractable: {fileID: 0}
   _timeOut: 0
+--- !u!1 &961194533
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 961194534}
+  m_Layer: 8
+  m_Name: RightHandSeedAttach
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &961194534
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961194533}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.0696, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4912124956614938364}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &963907964
 GameObject:
   m_ObjectHideFlags: 0
@@ -11811,7 +11874,7 @@ GameObject:
   - component: {fileID: 1129136284}
   - component: {fileID: 1129136283}
   - component: {fileID: 1129136282}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Seed (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12004,7 +12067,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1149743147}
   - component: {fileID: 1149743148}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HandGrabPose
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12360,7 +12423,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1203376624}
   - component: {fileID: 1203376625}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HandGrab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -12434,7 +12497,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1208070106}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Semillas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -17532,6 +17595,103 @@ MonoBehaviour:
   _rigidbody: {fileID: 932609604}
   _kinematicWhileSelected: 1
   _throwWhenUnselected: 1
+--- !u!1 &1224087353
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1224087354}
+  - component: {fileID: 1224087356}
+  - component: {fileID: 1224087355}
+  - component: {fileID: 1224087357}
+  m_Layer: 9
+  m_Name: Triggers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1224087354
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1224087353}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.1237, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 147416266}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1224087355
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1224087353}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3a580fe59171654f8085f8e50a6a629, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  seedPrefab: {fileID: 0}
+  leftHandAttachPoint: {fileID: 0}
+  rightHandAttachPoint: {fileID: 0}
+--- !u!65 &1224087356
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1224087353}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.08, y: 0.06, z: 0.08}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!54 &1224087357
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1224087353}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &1240086386
 GameObject:
   m_ObjectHideFlags: 0
@@ -18147,7 +18307,7 @@ GameObject:
   - component: {fileID: 1287889020}
   - component: {fileID: 1287889019}
   - component: {fileID: 1287889018}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ISDK_DistanceHandGrabInteraction
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -18360,7 +18520,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1302003012}
   - component: {fileID: 1302003013}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HandGrabPose
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19008,7 +19168,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1404842369}
   - component: {fileID: 1404842370}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: HandGrab_mirror
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19190,7 +19350,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1430955265}
   - component: {fileID: 1430955266}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ControllerGrab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -26456,7 +26616,7 @@ GameObject:
   - component: {fileID: 1664375844}
   - component: {fileID: 1664375843}
   - component: {fileID: 1664375842}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Seed (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28088,7 +28248,7 @@ GameObject:
   - component: {fileID: 1770302876}
   - component: {fileID: 1770302875}
   - component: {fileID: 1770302874}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Seed (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33941,7 +34101,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1876607919}
   - component: {fileID: 1876607920}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33982,7 +34142,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.1, y: 0.08, z: 0.17}
+  m_Size: {x: 0.1, y: 0.08, z: 0.18}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &1882874493
 GameObject:
@@ -52735,7 +52895,7 @@ GameObject:
   - component: {fileID: 4192987755591448676}
   - component: {fileID: 2546396946595115671}
   - component: {fileID: 3916856524250325230}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Seed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -62318,7 +62478,7 @@ GameObject:
   - component: {fileID: 804582819300983705}
   m_Layer: 8
   m_Name: '[BuildingBlock] Hand Tracking right'
-  m_TagString: Untagged
+  m_TagString: RightHand
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -70915,7 +71075,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 961194534}
   m_Father: {fileID: 6784441481215659004}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4912755092550348830
@@ -74742,7 +74903,7 @@ GameObject:
   - component: {fileID: 3018805714365733601}
   m_Layer: 8
   m_Name: '[BuildingBlock] Hand Tracking left'
-  m_TagString: Untagged
+  m_TagString: LeftHand
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -90159,7 +90320,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 683279437}
   m_Father: {fileID: 904817394482959715}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8015745548739650843
