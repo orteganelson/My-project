@@ -10,6 +10,8 @@ TagManager:
   - LeftHand
   - RightHand
   - Seed
+  - SeedTargetZone
+  - SeedSpawnPoint
   layers:
   - Default
   - TransparentFX
