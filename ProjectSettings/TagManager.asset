@@ -12,6 +12,7 @@ TagManager:
   - Seed
   - SeedTargetZone
   - SeedSpawnPoint
+  - SnowGround
   layers:
   - Default
   - TransparentFX
