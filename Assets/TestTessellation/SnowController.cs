@@ -25,7 +25,7 @@ public class SnowController : MonoBehaviour
         CreateRenderTexture();
         SetRTColorToWhite();
         SetMaterialTexture();
-        InvokeRepeating(nameof(AddSnowLayer), .1f, .1f);
+        //InvokeRepeating(nameof(AddSnowLayer), .1f, .1f);
         ExtendBoundsofMesh();
     }
 
