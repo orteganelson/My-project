@@ -33216,7 +33216,7 @@ Transform:
   m_GameObject: {fileID: 1264356398}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -12.99, y: -1.39, z: 16.61}
+  m_LocalPosition: {x: -11.54, y: -1.39, z: 38.68}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -34131,7 +34131,7 @@ MonoBehaviour:
   m_OverrideVoxelSize: 0
   m_VoxelSize: 0.16666667
   m_MinRegionArea: 2
-  m_NavMeshData: {fileID: 23800000, guid: 5d74d492f1a0e8b43b7d094f5db564e8, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: 7b6f98086d3c0d24fa4938fd430a1545, type: 2}
   m_BuildHeightMesh: 0
 --- !u!1001 &1321196189
 PrefabInstance:
@@ -36650,7 +36650,7 @@ Transform:
   m_GameObject: {fileID: 1726359776}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 15.87, y: 0, z: 7.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -43693,7 +43693,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &2030422957
 Rigidbody:
   m_ObjectHideFlags: 0
