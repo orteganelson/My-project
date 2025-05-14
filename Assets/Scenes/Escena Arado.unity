@@ -21275,13 +21275,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de4ed684fc2dc25438b143ebf058944a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tip: {fileID: 747945436}
-  raycastDistance: 0.2
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 4096
-  spacing: 0.3
-  verticalOffset: 0.01
 --- !u!1001 &1280559406
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38230,13 +38223,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: de4ed684fc2dc25438b143ebf058944a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tip: {fileID: 1592751318}
-  raycastDistance: 0.2
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 4096
-  spacing: 0.8
-  verticalOffset: -0.09
 --- !u!114 &1592751330
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40043,7 +40029,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1725029160
 Transform:
   m_ObjectHideFlags: 0

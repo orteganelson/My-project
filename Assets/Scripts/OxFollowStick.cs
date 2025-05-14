@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
-using Oculus.Haptics;      
+using Oculus.Haptics;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
-[RequireComponent(typeof(AudioSource))] 
+[RequireComponent(typeof(AudioSource))]
+
 public class OxFollowStick : MonoBehaviour
 {
     // --- Estados ---
