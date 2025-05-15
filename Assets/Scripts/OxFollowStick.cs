@@ -327,5 +327,20 @@ public class OxFollowStick : MonoBehaviour
         }
         return null;
     }
+    //***********************************************************************************
+    // --- Métodos públicos para control externo ---
+    public void ForceWalkAnimation(bool walking)
+    {
+        SetWalkingAnimation(walking);
+        if (agent != null)
+            agent.isStopped = !walking;
+    }
+
+    public void ForceStop()
+    {
+        if (agent != null)
+            agent.isStopped = true;
+        SetWalkingAnimation(false);
+    }
 
 } // Fin de la clase OxFollowStick
