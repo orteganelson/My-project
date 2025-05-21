@@ -13,6 +13,8 @@ TagManager:
   - SeedTargetZone
   - SeedSpawnPoint
   - SnowGround
+  - StartSeeds
+  - Buey
   layers:
   - Default
   - TransparentFX
