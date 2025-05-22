@@ -1,33 +1,9 @@
-/*using UnityEngine;
-
-public class ZonaSiembra : MonoBehaviour
-{
-    public ParticleSystem particleSistemaHermano;
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Seed"))
-        {
-            Debug.Log("<color=green>¡La semilla cayó en la zona correcta!</color>");
-
-            // Detener el sistema de partículas si fue asignado
-            if (particleSistemaHermano != null)
-            {
-                //particleSistemaHermano.Stop();
-                particleSistemaHermano.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-            }
-
-            // Destruir la semilla
-            //Destroy(other.gameObject);
-        }
-    }
-}*/
-
 using UnityEngine;
 
 public class ZonaSiembra : MonoBehaviour
 {
-    public GameObject prefabTillage; // Arrastra aquí el prefab Tillage_1x1 desde Assets
+    public ParticleSystem particleSistemaHermano;
+    public Material materialTierraArada; // Material nuevo para la tierra arada
 
     private void OnTriggerEnter(Collider other)
     {
@@ -35,18 +11,49 @@ public class ZonaSiembra : MonoBehaviour
         {
             Debug.Log("<color=green> Semilla detectada. Iniciando siembra.</color>");
 
-            // Instanciar el prefab en la posición del objeto Visual
-            if (prefabTillage != null)
+            // Detener partículas
+            if (particleSistemaHermano != null)
             {
-                Instantiate(prefabTillage, transform.position, transform.rotation);
+                particleSistemaHermano.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             }
 
-            // Desactivar el cubo Visual
-            gameObject.SetActive(false);
+            // Cambiar material de Tillage1
+            Transform tillage1 = transform.Find("Tillage1");
+            if (tillage1 != null)
+            {
+                MeshRenderer renderer = tillage1.GetComponent<MeshRenderer>();
+                if (renderer != null && materialTierraArada != null)
+                {
+                    renderer.material = materialTierraArada;
+                    Debug.Log("<color=cyan>Material de Tillage1 cambiado correctamente.</color>");
+                }
+                else
+                {
+                    Debug.LogWarning("No se encontró el MeshRenderer en Tillage1 o el material no está asignado.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("No se encontró el hijo llamado 'Tillage1'.");
+            }
 
-            // Destruir la semilla
-            Destroy(other.gameObject);
+            // Activar el objeto hijo llamado "SemillaVisual"
+            Transform semillaVisual = transform.Find("SemillaVisual");
+            if (semillaVisual != null)
+            {
+                semillaVisual.gameObject.SetActive(true);
+                Debug.Log("<color=yellow>Semilla visual activada.</color>");
+            }
+            else
+            {
+                Debug.LogWarning("No se encontró el hijo llamado 'SemillaVisual'.");
+            }
+
+            // (Opcional) destruir la semilla original que colisionó
+            // Destroy(other.gameObject);
+
+            // (Opcional) desactivar esta zona de siembra
+            // gameObject.SetActive(false);
         }
     }
 }
-
